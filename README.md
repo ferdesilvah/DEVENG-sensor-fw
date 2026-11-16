@@ -8,6 +8,7 @@ Embedded firmware for a Seeed XIAO ESP32-C3 that measures water flow and two pre
 ├── platformio.ini          PlatformIO env for seeed_xiao_esp32c3
 ├── src/main.cpp            Firmware (flow + pressure + OLED + serial)
 ├── tools/
+│   ├── dashboard_gui.py    Dashboard: live flow + P1/P2, record runs, export CSV
 │   ├── flow_monitor_gui.py Live plot / record from the monitor firmware
 │   └── flowcal_gui.py      Gravimetric flow-calibration helper GUI
 ├── data/
@@ -82,15 +83,17 @@ python tools/flow_monitor_gui.py
 
 Pick the XIAO COM port → Connect. The GUI plots L/min and can record a CSV.
 
-## Test runs (flow + pressure recording)
+## Dashboard (flow + pressure, record + export)
 
 ```bash
-python tools/testrun_gui.py
+python tools/dashboard_gui.py
 ```
 
-Pick the COM port → Connect, type a label, then **Start run** / **Stop run**. Holding the board's button for 1 s also starts/stops a run, and the tool follows the board either way. A run resets total volume and peaks and starts a run timer (OLED page 1 shows `RUN n m:ss`). Run numbers are saved on the board, so they stay unique across reboots.
+Pick the COM port → Connect. Tiles show live flow (L/min, Hz, run volume, calibrated-range warning), P1 and P2 (psi, volts, peak, sensor status); below them are live plots of all three.
 
-The tool plots flow, P1 and P2 live, shows run stats, and on stop autosaves `data/runs/run###_<label>_<date-time>.csv` (columns: `run, label, run_time_s, device_time_s, pc_time, flow_hz, flow_L_per_min, run_volume_L, p1_psi, p2_psi, p1_V, p2_V, p1_status, p2_status`). `run_time_s` comes from the board's clock, so PC lag doesn't affect timing.
+**Test runs:** type a label, then **Start run** / **Stop run**. Holding the board's button for 1 s also starts/stops a run, and the dashboard follows the board either way. A run resets total volume and peaks and starts a run timer (OLED page 1 shows `RUN n m:ss`). Run numbers are saved on the board, so they stay unique across reboots.
+
+Each run is listed under *Runs this session*: click one to plot it and see stats, select one or more and **Export CSV...** to save. On stop the dashboard autosaves `data/runs/run###_<label>_<date-time>.csv` (columns: `run, label, run_time_s, device_time_s, pc_time, flow_hz, flow_L_per_min, run_volume_L, p1_psi, p2_psi, p1_V, p2_V, p1_status, p2_status`). `run_time_s` comes from the board's clock, so PC lag doesn't affect timing.
 
 Sample interval: **Set** in the tool or serial `i <ms>` (100–10000, default 500; resets to 500 on reboot). Short intervals make flow coarse: at 10 Hz a 200 ms sample holds only ~2 pulses.
 
